@@ -1,8 +1,10 @@
 package com.fourdigital.marketintelligence.feature.settings.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
@@ -19,35 +21,46 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import com.fourdigital.marketintelligence.domain.model.AppTheme
 import com.fourdigital.marketintelligence.domain.model.RiskProfile
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    onBack: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val prefs by viewModel.preferences.collectAsState()
     val apiKeys by viewModel.apiKeyState.collectAsState()
     val diagnostics by viewModel.diagnostics.collectAsState()
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Settings", fontFamily = FontFamily.Monospace) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
+    ) { padding ->
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
+            .padding(padding)
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
-            Text(
-                text = "SETTINGS",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp
-                ),
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(Modifier.height(4.dp))
             Text(
                 text = "Configure your 4D Market Intelligence experience",
                 style = MaterialTheme.typography.bodySmall,
@@ -108,7 +121,7 @@ fun SettingsScreen(
         item {
             ApiKeyField(
                 label = "Finnhub",
-                description = "Stocks, DAX, indices — finnhub.io (pre-configured, editable)",
+                description = "Stocks, DAX, indices — finnhub.io",
                 value = apiKeys.finnhubKey,
                 onSave = viewModel::saveFinnhubKey
             )
@@ -117,7 +130,7 @@ fun SettingsScreen(
         item {
             ApiKeyField(
                 label = "Brapi",
-                description = "Bovespa / B3 stocks — brapi.dev (pre-configured, editable)",
+                description = "Bovespa / B3 stocks — brapi.dev",
                 value = apiKeys.brapiKey,
                 onSave = viewModel::saveBrapiKey
             )
@@ -126,7 +139,7 @@ fun SettingsScreen(
         item {
             ApiKeyField(
                 label = "TwelveData API Key",
-                description = "Optional market data account — twelvedata.com (pre-configured, editable)",
+                description = "Optional market data — twelvedata.com",
                 value = apiKeys.twelveDataKey,
                 onSave = viewModel::saveTwelveDataKey
             )
@@ -135,7 +148,7 @@ fun SettingsScreen(
         item {
             ApiKeyField(
                 label = "Massive/Polygon API Key",
-                description = "Optional market data account — massive.com / polygon.io (pre-configured, editable)",
+                description = "Optional market data — massive.com / polygon.io",
                 value = apiKeys.massiveKey,
                 onSave = viewModel::saveMassiveKey
             )
@@ -213,15 +226,93 @@ fun SettingsScreen(
 
         item {
             val models = viewModel.availableAIModels
-            val selectedIndex = models.indexOfFirst { m -> m.id == prefs.selectedAIModel }.coerceAtLeast(0)
-            SettingSegmentedButton(
-                label = "AI Model",
-                options = models.take(4).map { it.displayName },
-                selectedIndex = selectedIndex.coerceAtMost(3),
-                onSelect = { idx ->
-                    models.getOrNull(idx)?.let { viewModel.updateSelectedAIModel(it.id) }
+            val selectedModel = models.firstOrNull { it.id == prefs.selectedAIModel } ?: models.first()
+            var showModelDialog by remember { mutableStateOf(false) }
+
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "AI Model",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = selectedModel.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = { showModelDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = selectedModel.displayName,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                 }
-            )
+            }
+
+            if (showModelDialog) {
+                AlertDialog(
+                    onDismissRequest = { showModelDialog = false },
+                    title = { Text("Select AI Model", fontFamily = FontFamily.Monospace) },
+                    text = {
+                        Column {
+                            models.forEach { model ->
+                                val isSelected = model.id == selectedModel.id
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            viewModel.updateSelectedAIModel(model.id)
+                                            showModelDialog = false
+                                        }
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = isSelected,
+                                        onClick = {
+                                            viewModel.updateSelectedAIModel(model.id)
+                                            showModelDialog = false
+                                        }
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = model.displayName,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontFamily = FontFamily.Monospace,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                        )
+                                        Text(
+                                            text = model.description,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showModelDialog = false }) {
+                            Text("Close")
+                        }
+                    }
+                )
+            }
         }
 
         item {
@@ -382,6 +473,7 @@ fun SettingsScreen(
 
         item { Spacer(Modifier.height(32.dp)) }
     }
+    } // Scaffold
 }
 
 // ---- Reusable Setting Components ----
@@ -510,14 +602,14 @@ private fun SettingSegmentedButton(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                options.forEachIndexed { index, option ->
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                items(options.size) { index ->
                     FilterChip(
                         selected = index == selectedIndex,
                         onClick = { onSelect(index) },
                         label = {
                             Text(
-                                text = option,
+                                text = options[index],
                                 fontFamily = FontFamily.Monospace,
                                 fontSize = 11.sp
                             )

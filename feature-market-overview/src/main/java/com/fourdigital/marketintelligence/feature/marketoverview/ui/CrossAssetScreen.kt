@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,39 +31,48 @@ private val BgBlack = Color(0xFF0D0D0D)
 private val CardBg = Color(0xFF1A1A2E)
 private val Muted = Color(0xFF888888)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrossAssetScreen(viewModel: CrossAssetViewModel = hiltViewModel()) {
+fun CrossAssetScreen(onBack: () -> Unit = {}, viewModel: CrossAssetViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val regime = viewModel.getRiskRegime()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().background(BgBlack).padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        contentPadding = PaddingValues(vertical = 16.dp)
-    ) {
-        // Header
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text("> CROSS-ASSET OVERVIEW", color = Green, fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                    if (state.lastRefresh.isNotEmpty()) {
-                        Text("Last update: ${state.lastRefresh}", color = Muted,
-                            fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Cross-Asset Overview", fontFamily = FontFamily.Monospace, fontSize = 16.sp) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
-                }
-                IconButton(onClick = { viewModel.loadQuotes() }) {
-                    if (state.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp),
-                            color = Blue, strokeWidth = 2.dp)
-                    } else {
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = BgBlack,
+                    titleContentColor = Green,
+                    navigationIconContentColor = Blue
+                ),
+                actions = {
+                    IconButton(onClick = { viewModel.loadQuotes() }) {
                         Icon(Icons.Default.Refresh, "Refresh", tint = Blue)
                     }
                 }
+            )
+        },
+        containerColor = BgBlack
+    ) { padding ->
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
+        // Timestamp
+        item {
+            if (state.lastRefresh.isNotEmpty()) {
+                Text("Last update: ${state.lastRefresh}", color = Muted,
+                    fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
         }
 
@@ -238,14 +248,37 @@ fun CrossAssetScreen(viewModel: CrossAssetViewModel = hiltViewModel()) {
             )
         }
     }
+    } // Scaffold
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen() {
+fun AboutScreen(onBack: () -> Unit = {}) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("About") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = TerminalBlack,
+                    titleContentColor = AccentBlue,
+                    navigationIconContentColor = AccentBlue
+                )
+            )
+        },
+        containerColor = TerminalBlack
+    ) { padding ->
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(TerminalBlack),
+            .padding(padding),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -297,4 +330,5 @@ fun AboutScreen() {
             )
         }
     }
+    } // Scaffold
 }

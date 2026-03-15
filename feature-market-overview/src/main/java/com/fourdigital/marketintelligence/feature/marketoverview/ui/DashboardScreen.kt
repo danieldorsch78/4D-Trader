@@ -45,7 +45,7 @@ fun DashboardScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(TerminalBlack),
+            .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -85,6 +85,38 @@ fun DashboardScreen(
                     IconButton(onClick = onNavigateToAbout) {
                         Icon(Icons.Filled.Info, "About", tint = TerminalTextSecondary)
                     }
+                }
+            }
+        }
+
+        // Loading / Error state
+        if (state.isLoading && state.quotes.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(color = AccentCyan)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text("Loading market data...", color = TerminalTextMuted, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
+
+        state.error?.let { error ->
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = LossRed.copy(alpha = 0.1f)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = error,
+                        color = LossRed,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(12.dp)
+                    )
                 }
             }
         }

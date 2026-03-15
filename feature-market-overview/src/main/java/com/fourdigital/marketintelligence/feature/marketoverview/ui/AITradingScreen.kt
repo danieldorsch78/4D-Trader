@@ -38,39 +38,50 @@ private val BgBlack = Color(0xFF0D0D0D)
 private val CardBg = Color(0xFF1A1A2E)
 private val Muted = Color(0xFF888888)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AITradingScreen(viewModel: AITradingViewModel = hiltViewModel()) {
+fun AITradingScreen(onBack: () -> Unit = {}, viewModel: AITradingViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val tabs = listOf("AI Analysis", "News Feed", "Predictions", "AI Agent")
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("AI Trading Intelligence", fontFamily = FontFamily.Monospace, fontSize = 16.sp) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = BgBlack,
+                    titleContentColor = Green,
+                    navigationIconContentColor = Blue
+                ),
+                actions = {
+                    IconButton(onClick = { viewModel.runFullAnalysis() }) {
+                        if (state.isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp),
+                                color = Blue, strokeWidth = 2.dp)
+                        } else {
+                            Icon(Icons.Default.Refresh, "Refresh", tint = Blue)
+                        }
+                    }
+                }
+            )
+        },
+        containerColor = BgBlack
+    ) { padding ->
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(BgBlack).padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
-        contentPadding = PaddingValues(vertical = 16.dp)
+        contentPadding = PaddingValues(vertical = 8.dp)
     ) {
-        // Header
+        // Last update timestamp
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text("> AI TRADING INTELLIGENCE", color = Green, fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                    if (state.lastRefresh.isNotEmpty()) {
-                        Text("Last update: ${state.lastRefresh}", color = Muted,
-                            fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                    }
-                }
-                IconButton(onClick = { viewModel.runFullAnalysis() }) {
-                    if (state.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp),
-                            color = Blue, strokeWidth = 2.dp)
-                    } else {
-                        Icon(Icons.Default.Refresh, "Refresh", tint = Blue)
-                    }
-                }
+            if (state.lastRefresh.isNotEmpty()) {
+                Text("Last update: ${state.lastRefresh}", color = Muted,
+                    fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
         }
 
@@ -282,6 +293,7 @@ fun AITradingScreen(viewModel: AITradingViewModel = hiltViewModel()) {
             )
         }
     }
+    } // Scaffold
 }
 
 @Composable

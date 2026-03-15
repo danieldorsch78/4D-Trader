@@ -60,41 +60,41 @@ class SettingsViewModel @Inject constructor(
     val availableAIModels = GitHubAIAnalyst.AVAILABLE_MODELS
 
     init {
-        loadApiKeys()
-        // Auto-test all connections on launch for real-time status
-        testAllApis()
+        viewModelScope.launch {
+            loadApiKeysInternal()
+            // Auto-test all connections after keys are loaded
+            testAllApis()
+        }
     }
 
-    private fun loadApiKeys() {
-        viewModelScope.launch {
-            try {
-                val finnhub = apiKeyManager.getKey(ApiKeyManager.FINNHUB) ?: ""
-                val brapi = apiKeyManager.getKey(ApiKeyManager.BRAPI) ?: ""
-                val twelveData = apiKeyManager.getKey(ApiKeyManager.TWELVE_DATA) ?: ""
-                val massive = apiKeyManager.getKey(ApiKeyManager.MASSIVE) ?: ""
-                val github = apiKeyManager.getKey(GitHubAIAnalyst.GITHUB_KEY) ?: ""
-                val openAi = apiKeyManager.getKey(ApiKeyManager.OPENAI) ?: ""
-                _apiKeyState.value = ApiKeyState(finnhub, brapi, twelveData, massive, github, openAi)
-                // Wait for first real emission from preferences before syncing
-                val current = preferences.first()
-                val needsSync = current.finnhubKeyConfigured != finnhub.isNotBlank()
-                        || current.brapiKeyConfigured != brapi.isNotBlank()
-                        || current.openAiKeyConfigured != openAi.isNotBlank()
-                if (needsSync) {
-                    preferencesRepo.updatePreferences(
-                        current.copy(
-                            finnhubKeyConfigured = finnhub.isNotBlank(),
-                            brapiKeyConfigured = brapi.isNotBlank(),
-                            openAiKeyConfigured = openAi.isNotBlank()
-                        )
+    private suspend fun loadApiKeysInternal() {
+        try {
+            val finnhub = apiKeyManager.getKey(ApiKeyManager.FINNHUB) ?: ""
+            val brapi = apiKeyManager.getKey(ApiKeyManager.BRAPI) ?: ""
+            val twelveData = apiKeyManager.getKey(ApiKeyManager.TWELVE_DATA) ?: ""
+            val massive = apiKeyManager.getKey(ApiKeyManager.MASSIVE) ?: ""
+            val github = apiKeyManager.getKey(GitHubAIAnalyst.GITHUB_KEY) ?: ""
+            val openAi = apiKeyManager.getKey(ApiKeyManager.OPENAI) ?: ""
+            _apiKeyState.value = ApiKeyState(finnhub, brapi, twelveData, massive, github, openAi)
+            // Wait for first real emission from preferences before syncing
+            val current = preferences.first()
+            val needsSync = current.finnhubKeyConfigured != finnhub.isNotBlank()
+                    || current.brapiKeyConfigured != brapi.isNotBlank()
+                    || current.openAiKeyConfigured != openAi.isNotBlank()
+            if (needsSync) {
+                preferencesRepo.updatePreferences(
+                    current.copy(
+                        finnhubKeyConfigured = finnhub.isNotBlank(),
+                        brapiKeyConfigured = brapi.isNotBlank(),
+                        openAiKeyConfigured = openAi.isNotBlank()
                     )
-                }
-                gitHubAI.setProviderMode(current.aiProviderMode)
-                gitHubAI.setSelectedModel(current.selectedAIModel)
-            } catch (e: Exception) {
-                // EncryptedSharedPreferences can throw if Keystore is corrupted
-                _apiKeyState.value = ApiKeyState()
+                )
             }
+            gitHubAI.setProviderMode(current.aiProviderMode)
+            gitHubAI.setSelectedModel(current.selectedAIModel)
+        } catch (e: Exception) {
+            // EncryptedSharedPreferences can throw if Keystore is corrupted
+            _apiKeyState.value = ApiKeyState()
         }
     }
 

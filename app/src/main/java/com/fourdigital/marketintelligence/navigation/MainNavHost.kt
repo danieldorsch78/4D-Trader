@@ -108,12 +108,12 @@ fun MainNavHost() {
             composable(Screen.Correlations.route) { CorrelationsScreen() }
             composable(Screen.Signals.route) { SignalCenterScreen() }
             composable(Screen.WorldClock.route) { WorldClockScreen() }
-            composable(Screen.Alerts.route) { AlertsScreen() }
-            composable(Screen.CrossAsset.route) { CrossAssetScreen() }
-            composable(Screen.Settings.route) { SettingsScreen() }
-            composable(Screen.About.route) { AboutScreen() }
-            composable(Screen.GitHubAgent.route) { GitHubScreen() }
-            composable(Screen.AITrading.route) { AITradingScreen() }
+            composable(Screen.Alerts.route) { AlertsScreen(onBack = { navController.popBackStack() }) }
+            composable(Screen.CrossAsset.route) { CrossAssetScreen(onBack = { navController.popBackStack() }) }
+            composable(Screen.Settings.route) { SettingsScreen(onBack = { navController.popBackStack() }) }
+            composable(Screen.About.route) { AboutScreen(onBack = { navController.popBackStack() }) }
+            composable(Screen.GitHubAgent.route) { GitHubScreen(onBack = { navController.popBackStack() }) }
+            composable(Screen.AITrading.route) { AITradingScreen(onBack = { navController.popBackStack() }) }
             composable(
                 route = Screen.AssetDetail.route,
                 arguments = listOf(androidx.navigation.navArgument("symbol") { type = androidx.navigation.NavType.StringType })

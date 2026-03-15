@@ -37,28 +37,35 @@ private val ErrorRed = Color(0xFFFF5252)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GitHubScreen(viewModel: GitHubViewModel = hiltViewModel()) {
+fun GitHubScreen(onBack: () -> Unit = {}, viewModel: GitHubViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("GitHub Intelligence", fontFamily = FontFamily.Monospace, fontSize = 16.sp) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = TerminalBlack,
+                    titleContentColor = TerminalGreen,
+                    navigationIconContentColor = AccentBlue
+                )
+            )
+        },
+        containerColor = TerminalBlack
+    ) { padding ->
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(TerminalBlack)
+            .padding(padding)
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(vertical = 16.dp)
+        contentPadding = PaddingValues(vertical = 8.dp)
     ) {
-        // Header
-        item {
-            Text(
-                text = "> GITHUB INTELLIGENCE",
-                color = TerminalGreen,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace
-            )
-        }
-
         // Connection card
         item { ConnectionCard(state, viewModel) }
 
@@ -165,6 +172,7 @@ fun GitHubScreen(viewModel: GitHubViewModel = hiltViewModel()) {
             }
         }
     }
+    } // Scaffold
 }
 
 @Composable

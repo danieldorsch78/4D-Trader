@@ -30,8 +30,18 @@ class RealStreamingProvider @Inject constructor(
     private var webSocket: WebSocket? = null
     private var connected = false
     private val json = Json { ignoreUnknownKeys = true }
+    // Cache last-known quotes so streaming trades carry forward previousClose/open/high/low
+    private val lastKnownQuotes = java.util.concurrent.ConcurrentHashMap<String, Quote>()
 
     override fun streamQuotes(symbols: List<String>): Flow<Quote> = channelFlow {
+        // Pre-load last-known quotes so streaming trades have correct previousClose/open
+        try {
+            val seedResult = realProvider.getQuotes(symbols)
+            if (seedResult is com.fourdigital.marketintelligence.core.common.result.DataResult.Success) {
+                seedResult.data.forEach { q -> lastKnownQuotes[q.symbol] = q }
+            }
+        } catch (_: Exception) { }
+
         val token = keyManager.getKey(ApiKeyManager.FINNHUB)
 
         if (token != null) {
@@ -65,22 +75,26 @@ class RealStreamingProvider @Inject constructor(
                                     val ts = obj["t"]?.jsonPrimitive?.long ?: 0L
 
                                     val originalSymbol = reverseMapSymbol(wsSymbol)
+                                    val cached = lastKnownQuotes[originalSymbol]
                                     val quote = Quote(
                                         symbol = originalSymbol,
                                         price = price,
-                                        previousClose = price,
-                                        open = price,
-                                        dayHigh = price,
-                                        dayLow = price,
-                                        volume = volume,
+                                        previousClose = cached?.previousClose ?: price,
+                                        open = cached?.open ?: price,
+                                        dayHigh = maxOf(price, cached?.dayHigh ?: price),
+                                        dayLow = minOf(price, cached?.dayLow ?: price),
+                                        volume = (cached?.volume ?: 0L) + volume,
                                         timestamp = if (ts > 0) kotlinx.datetime.Instant.fromEpochMilliseconds(ts) else Clock.System.now(),
                                         dataQuality = QuoteDataQuality.REALTIME_STREAMING,
                                         providerName = providerName
                                     )
+                                    lastKnownQuotes[originalSymbol] = quote
                                     trySend(quote)
                                 }
                             }
-                        } catch (_: Exception) { }
+                        } catch (e: Exception) {
+                            timber.log.Timber.d(e, "WS parse error")
+                        }
                     }
 
                     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {

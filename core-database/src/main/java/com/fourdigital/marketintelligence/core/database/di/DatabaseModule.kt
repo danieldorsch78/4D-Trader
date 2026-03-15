@@ -22,7 +22,9 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "market_intelligence_db"
-        ).fallbackToDestructiveMigrationOnDowngrade().build()
+        ).fallbackToDestructiveMigration()
+         .fallbackToDestructiveMigrationOnDowngrade()
+         .build()
     }
 
     @Provides fun provideWatchlistDao(db: AppDatabase): WatchlistDao = db.watchlistDao()

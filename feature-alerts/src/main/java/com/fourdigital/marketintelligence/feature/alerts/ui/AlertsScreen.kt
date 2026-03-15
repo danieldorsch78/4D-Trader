@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -22,13 +23,30 @@ import com.fourdigital.marketintelligence.domain.model.AlertEvent
 import com.fourdigital.marketintelligence.domain.model.AlertRule
 import com.fourdigital.marketintelligence.domain.model.AlertType
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlertsScreen(
+    onBack: () -> Unit = {},
     viewModel: AlertsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Alerts", fontFamily = FontFamily.Monospace) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = viewModel::showCreateDialog,
@@ -45,18 +63,6 @@ fun AlertsScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            Text(
-                text = "ALERTS",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp
-                ),
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(Modifier.height(12.dp))
-
             // Tab selector
             TabRow(selectedTabIndex = uiState.selectedTab) {
                 Tab(
