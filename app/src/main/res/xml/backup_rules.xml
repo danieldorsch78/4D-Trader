@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Back up Room database (API keys, watchlists, alerts, portfolio) -->
+    <include domain="database" path="market_intelligence_db" />
+    <!-- Back up DataStore preferences (user settings) -->
+    <include domain="file" path="datastore/user_preferences.preferences_pb" />
+</full-backup-content>

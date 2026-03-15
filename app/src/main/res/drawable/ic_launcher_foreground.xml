@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:pivotX="54"
+        android:pivotY="54">
+
+        <!-- ===== UPWARD TREND AREA (gradient-like fill under chart) ===== -->
+        <path
+            android:fillColor="#0D3A2A"
+            android:pathData="M24,72 L34,64 L44,60 L54,52 L64,46 L74,40 L84,36 L84,76 L24,76 Z"/>
+        <path
+            android:fillColor="#0A2E22"
+            android:pathData="M24,72 L34,64 L44,60 L54,52 L64,46 L74,40 L84,36 L84,80 L24,80 Z"/>
+
+        <!-- ===== CANDLESTICK BARS ===== -->
+        <!-- Candle 1 - red (bearish) -->
+        <path
+            android:fillColor="#E5534B"
+            android:pathData="M31,62 L31,70 L35,70 L35,62 Z"/>
+        <path
+            android:strokeColor="#E5534B"
+            android:strokeWidth="1.2"
+            android:fillColor="#00000000"
+            android:pathData="M33,58 L33,62 M33,70 L33,74"/>
+
+        <!-- Candle 2 - green (bullish) -->
+        <path
+            android:fillColor="#00D4AA"
+            android:pathData="M41,56 L41,64 L45,64 L45,56 Z"/>
+        <path
+            android:strokeColor="#00D4AA"
+            android:strokeWidth="1.2"
+            android:fillColor="#00000000"
+            android:pathData="M43,52 L43,56 M43,64 L43,68"/>
+
+        <!-- Candle 3 - green (bullish, taller) -->
+        <path
+            android:fillColor="#00D4AA"
+            android:pathData="M51,46 L51,58 L55,58 L55,46 Z"/>
+        <path
+            android:strokeColor="#00D4AA"
+            android:strokeWidth="1.2"
+            android:fillColor="#00000000"
+            android:pathData="M53,42 L53,46 M53,58 L53,62"/>
+
+        <!-- Candle 4 - red (bearish, small) -->
+        <path
+            android:fillColor="#E5534B"
+            android:pathData="M61,44 L61,50 L65,50 L65,44 Z"/>
+        <path
+            android:strokeColor="#E5534B"
+            android:strokeWidth="1.2"
+            android:fillColor="#00000000"
+            android:pathData="M63,40 L63,44 M63,50 L63,54"/>
+
+        <!-- Candle 5 - green (bullish, strong) -->
+        <path
+            android:fillColor="#00D4AA"
+            android:pathData="M71,34 L71,48 L75,48 L75,34 Z"/>
+        <path
+            android:strokeColor="#00D4AA"
+            android:strokeWidth="1.2"
+            android:fillColor="#00000000"
+            android:pathData="M73,30 L73,34 M73,48 L73,52"/>
+
+        <!-- ===== MOVING AVERAGE LINE ===== -->
+        <path
+            android:strokeColor="#58A6FF"
+            android:strokeWidth="1.8"
+            android:fillColor="#00000000"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M26,68 C32,65 36,62 43,58 C48,55 52,50 53,48 C56,44 60,42 63,41 C67,39 72,36 80,33"/>
+
+        <!-- ===== 4D BRANDING ===== -->
+        <!-- "4" character - bold modern style -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M28,28 L28,22 L36,22 L36,18 L24,18 L24,28 L28,22 Z"/>
+        <!-- Refined "4" -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M26,18 L26,26 L22,26 L22,29 L26,29 L26,34 L29.5,34 L29.5,29 L34,29 L34,26 L29.5,26 L29.5,18 Z"/>
+
+        <!-- "D" character - bold modern style -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M37,18 L37,34 L46,34 Q51,34 51,29 L51,23 Q51,18 46,18 Z M40.5,21.5 L45,21.5 Q47.5,21.5 47.5,23.5 L47.5,28.5 Q47.5,30.5 45,30.5 L40.5,30.5 Z"/>
+
+        <!-- Accent underline for 4D -->
+        <path
+            android:strokeColor="#00D4AA"
+            android:strokeWidth="1.5"
+            android:fillColor="#00000000"
+            android:strokeLineCap="round"
+            android:pathData="M24,36 L51,36"/>
+
+        <!-- ===== PULSE DOT (live indicator) ===== -->
+        <path
+            android:fillColor="#00D4AA"
+            android:pathData="M80,33 m-3,0 a3,3 0 1,1 6,0 a3,3 0 1,1 -6,0"/>
+        <!-- Outer pulse ring -->
+        <path
+            android:strokeColor="#00D4AA"
+            android:strokeWidth="0.8"
+            android:fillColor="#00000000"
+            android:pathData="M80,33 m-5.5,0 a5.5,5.5 0 1,1 11,0 a5.5,5.5 0 1,1 -11,0"/>
+
+    </group>
+</vector>
